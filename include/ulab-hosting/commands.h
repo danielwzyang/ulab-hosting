@@ -1,10 +1,7 @@
 #pragma once
 
-#include <stdlib.h>
-
-#define MIN_PORT 10000
-#define MAX_PORT 10999
-#define MAX_USER_LEN 32 // doesn't include \0
+#include <stdio.h>
+#include <stdint.h>
 
 /*
     CMD_UNKNOWN = 0,
@@ -16,7 +13,7 @@
     CMD_KILL // kill process taking up user's port
 */
 
-typedef int (*cmd_handler)(int argc, char * const * argv);
+typedef int (*cmd_handler)(int argc, char * const *argv);
 
 typedef struct {
     const char *name;
@@ -25,7 +22,5 @@ typedef struct {
     cmd_handler handler;
 } Command;
 
-extern const Command commands[];
-extern const size_t num_commands;
-
+void print_help(const char *prog, FILE *out);
 const Command *find_command(const char *name);

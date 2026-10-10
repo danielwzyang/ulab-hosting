@@ -4,8 +4,6 @@
 
 #include "ulab-hosting/commands.h"
 
-static void print_help(const char *prog, FILE *out);
-
 int main(int argc, char **argv) {
     if (argc == 1) {
         print_help(argv[0], stderr);
@@ -25,17 +23,4 @@ int main(int argc, char **argv) {
     }
 
     return command->handler(argc, argv);
-}
-
-static void print_help(const char *prog, FILE *out) {
-    fprintf(out, "Usage: %s <command> [arguments]\n", prog);
-    fputs("\n", out);
-    fputs("Commands:\n", out);
-
-    for (size_t i = 0; i < num_commands; i++) {
-        char name_and_args[32];
-        snprintf(name_and_args, 32, "%s %s", commands[i].name, commands[i].args);
-        
-        fprintf(out, "  %-20s %s\n", name_and_args, commands[i].description);
-    }
 }
