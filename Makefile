@@ -1,5 +1,5 @@
 CC := gcc
-CCFLAGS := -std=c11 -Wall -Wextra -Wpedantic -Iinclude
+CCFLAGS := -std=c11 -Wall -Wextra -Wpedantic -Iinclude -D_POSIX_C_SOURCE=200809L
 BUILD := build
 TARGET := $(BUILD)/ulab-hosting
 

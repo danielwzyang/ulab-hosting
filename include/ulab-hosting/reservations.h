@@ -10,9 +10,9 @@
 
 typedef struct {
     char owner[MAX_USER_LEN + 1];
-    time_t reservation_date;
+    time_t reservation_time;
 } Reservation;
 
-int is_regular_file(const char *path);
+int get_reservations(Reservation *reservations, const char *path);
 
-int get_reservations(Reservation *reservations);
+int parse_port(const char *arg, uint16_t *port);
