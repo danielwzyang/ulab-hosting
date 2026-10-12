@@ -13,6 +13,8 @@ typedef struct {
     time_t reservation_time;
 } Reservation;
 
+void print_reservations(const Reservation *reservations, size_t start, size_t end, int print_free);
+
 int get_reservations(Reservation *reservations, const char *path);
 
 int parse_port(const char *arg, uint16_t *port);

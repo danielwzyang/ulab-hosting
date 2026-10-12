@@ -5,9 +5,11 @@
 #include "ulab-hosting/commands.h"
 #include "ulab-hosting/reservations.h"
 
+static int cmd_status(int argc, char * const *argv);
 static int cmd_reserve(int argc, char * const *argv);
 
 static const Command commands[] = {
+    { "status", "[port]", "view all reserved ports or check status on a specific port", cmd_status },
     { "reserve", "[port]", "reserve a port forwarded to hosting.ee.cooper.edu/~<user>/", cmd_reserve },
 };
 
@@ -36,6 +38,38 @@ const Command *find_command(const char *name) {
     return NULL;
 }
 
+static int cmd_status(int argc, char * const *argv) {
+    if (argc > 3) {
+        fprintf(stderr, "Too many arguments. Expected %s status [port]\n", argv[0]);
+        return EXIT_FAILURE;
+    }
+
+    uint16_t port = 0;
+
+    // port given
+    if (argc > 2 && parse_port(argv[2], &port) != 0) {
+        fprintf(stderr, "Invalid port: '%s'. Expected [%d-%d]\n", argv[2], MIN_PORT, MAX_PORT);
+        return EXIT_FAILURE;
+    }
+
+    Reservation reservations[NUM_PORTS] = {0};
+    const char *path = "/etc/caddy/reservations";
+    if (get_reservations(reservations, path) != 0) {
+        return EXIT_FAILURE;
+    }
+
+    // if port == 0 print all ports otherwise only print specific port
+    // can potentially add a flag to print free ports when using status as well
+    if (port == 0) {
+        print_reservations(reservations, 0, NUM_PORTS, 0);
+    } else {
+        size_t index = port - MIN_PORT;
+        print_reservations(reservations, index, index + 1, 1); // still print if free
+    }
+
+    return EXIT_SUCCESS;
+}
+
 static int cmd_reserve(int argc, char * const *argv) {
     if (argc > 3) {
         fprintf(stderr, "Too many arguments. Expected %s reserve [port]\n", argv[0]);
@@ -44,7 +78,6 @@ static int cmd_reserve(int argc, char * const *argv) {
 
     uint16_t port = 0;
 
-    // port given
     if (argc > 2 && parse_port(argv[2], &port) != 0) {
         fprintf(stderr, "Invalid port: '%s'. Expected [%d-%d]\n", argv[2], MIN_PORT, MAX_PORT);
         return EXIT_FAILURE;

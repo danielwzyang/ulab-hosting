@@ -5,10 +5,33 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <dirent.h>
+#include <time.h>
 
 #include "ulab-hosting/reservations.h"
 
+static int print_reservation(uint16_t port, const Reservation *reservation);
+
 static int parse_reservation(int dir_fd, const char *filename, uint16_t *port, Reservation *reservation);
+
+void print_reservations(const Reservation *reservations, size_t start, size_t end, int print_free) {
+    printf("%-10s %-35s %-20s\n", "Port", "Owner", "Reservation Date");
+    printf("%-10s %-35s %-20s\n", "---", "---", "---");
+    for (size_t i = start; i < end; i++) {
+        if (reservations[i].owner[0] != '\0' || print_free) {
+            print_reservation(i + MIN_PORT, &reservations[i]);
+        }
+    }
+}
+
+static int print_reservation(uint16_t port, const Reservation *reservation) {
+    if (reservation->owner[0] == '\0') {
+        printf("%-10u %-35s %-20s\n", port, "FREE", "FREE");
+    } else {
+        printf("%-10u %-35s %-20s", port, reservation->owner, ctime(&reservation->reservation_time));
+    }
+
+    return EXIT_SUCCESS;
+}
 
 int get_reservations(Reservation *reservations, const char *path) {
     DIR *dir;
