@@ -64,7 +64,7 @@ static int cmd_status(int argc, char * const *argv) {
         // can potentially add a flag to print free ports when using status as well
         print_reservations(reservations, false);
     } else {
-        print_reservation(port, &reservations[port - MIN_PORT]);
+        print_reservation(&reservations[port - MIN_PORT], port);
     }
 
     return EXIT_SUCCESS;
@@ -88,6 +88,13 @@ static int cmd_reserve(int argc, char * const *argv) {
     if (get_reservations(reservations, path) != 0) {
         return EXIT_FAILURE;
     }
+    
+    if (port == 0 && find_free_port(reservations, &port) != 0) {
+        fprintf(stderr, "No free ports. See %s status [port]\n", argv[0]);
+        return EXIT_FAILURE;
+    }
+
+    printf("Reserving port %u.\n", (unsigned int) port);
 
     return EXIT_SUCCESS;
 } 

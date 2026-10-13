@@ -16,8 +16,10 @@ typedef struct {
 
 void print_reservation_header(void);
 void print_reservations(const Reservation *reservations, bool include_free);
-void print_reservation(uint16_t port, const Reservation *reservation);
+void print_reservation(const Reservation *reservation, uint16_t port);
 
 int get_reservations(Reservation *reservations, const char *path);
+
+int find_free_port(const Reservation *reservations, uint16_t *port);
 
 int parse_port(const char *arg, uint16_t *port);

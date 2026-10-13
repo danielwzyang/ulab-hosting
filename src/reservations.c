@@ -20,12 +20,12 @@ void print_reservation_header(void) {
 void print_reservations(const Reservation *reservations, bool include_free) {
     for (size_t i = 0; i < NUM_PORTS; i++) {
         if (reservations[i].owner[0] != '\0' || include_free) {
-            print_reservation(i + MIN_PORT, &reservations[i]);
+            print_reservation(&reservations[i], i + MIN_PORT);
         }
     }
 }
 
-void print_reservation(uint16_t port, const Reservation *reservation) {
+void print_reservation(const Reservation *reservation, uint16_t port) {
     if (reservation->owner[0] == '\0') {
         printf("%-10u %-35s %-20s\n", port, "FREE", "FREE");
     } else {
@@ -161,4 +161,15 @@ int parse_port(const char *arg, uint16_t *port) {
 
     *port = (uint16_t) value;
     return EXIT_SUCCESS; 
+}
+
+int find_free_port(const Reservation *reservations, uint16_t *port) {
+    for (size_t i = 0; i < NUM_PORTS; i++) {
+        if (reservations[i].owner[0] == '\0') {
+            *port = (uint16_t) (i + MIN_PORT);
+            return EXIT_SUCCESS;
+        }
+    }
+    
+    return EXIT_FAILURE;
 }
