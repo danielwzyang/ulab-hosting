@@ -83,40 +83,51 @@ static int cmd_reserve(int argc, char * const *argv) {
         return EXIT_FAILURE;
     }
 
+    int lock;
+    if (get_file_lock(&lock) != 0) {
+        return EXIT_FAILURE;
+    }
+
+    int rescode = EXIT_FAILURE;
+
     Reservation reservations[NUM_PORTS] = {0};
     if (get_reservations(reservations) != 0) {
-        return EXIT_FAILURE;
+        goto done;
     }
     
     if (port == 0) {
         if (find_free_port(reservations, &port) != 0) {
             fputs("No free ports available.\n", stderr);
-            return EXIT_FAILURE;
+            goto done;
         }
     } else if (!is_reservation_free(&reservations[port - MIN_PORT])) {
         fprintf(stderr, "Port %u is already reserved.\n", (unsigned int) port);
-        return EXIT_FAILURE;
+        goto done;
     }
 
     char username[MAX_USER_LEN + 1];
     if (get_username(username) != 0) {
         fputs("Failed to get username.\n", stderr);
-        return EXIT_FAILURE;
+        goto done;
     }
 
     for (size_t i = 0; i < NUM_PORTS; i++) {
         if (strcmp(reservations[i].owner, username) == 0) {
             fprintf(stderr, "You already have port %u reserved.\n", (unsigned int) (i + MIN_PORT));
-            return EXIT_FAILURE;
+            goto done;
         }
     }
 
     if (write_reservation_file(username, port) != 0) {
-        return EXIT_FAILURE; 
+        goto done;
     }
+
+    rescode = EXIT_SUCCESS;
 
     printf("Successfully reserved port %u for %s.\n", (unsigned int) port, username);
 
-    return EXIT_SUCCESS;
+    done:
+    release_lock(lock);
+    return rescode;
 } 
 

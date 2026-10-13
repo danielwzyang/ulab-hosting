@@ -24,7 +24,7 @@ $(BUILD):
 	@mkdir -p $(BUILD)
 
 setuid:
-	@sudo chown root:root build/ulab-hosting                                                          130 :(
+	@sudo chown root:root build/ulab-hosting 
 	@sudo chmod u+s build/ulab-hosting 
 
 clean:

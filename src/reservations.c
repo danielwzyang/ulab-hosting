@@ -35,7 +35,7 @@ void print_reservation(const Reservation *reservation, uint16_t port) {
                 strftime(time_str, sizeof time_str, "%Y-%m-%d %H:%M", &tm) == 0) {
             snprintf(time_str, sizeof time_str, "unknown");
         }
-        printf("%-10u %-35s %-20s\n", port, reservation->owner, time_str);
+        printf("%-10u %-35s %-20s\n", (unsigned int) port, reservation->owner, time_str);
     }
 }
 

@@ -3,6 +3,8 @@
 #include <unistd.h>
 #include <pwd.h>
 #include <sys/stat.h>
+#include <fcntl.h>
+#include <sys/file.h>
 
 #include "ulab-hosting/reservations.h"
 
@@ -83,8 +85,30 @@ int write_reservation_file(const char *username, const uint16_t port) {
 
     rescode = EXIT_SUCCESS;
 
-    done:
+done:
     if (file != NULL) fclose(file);
     unlink(template);
     return rescode;
+}
+
+int get_file_lock(int *fd) {
+    int lock = open(RESERVATIONS_PATH, O_RDONLY); 
+    if (lock == -1) {
+        perror(RESERVATIONS_PATH); 
+        return EXIT_FAILURE;
+    }
+
+    if (flock(lock, LOCK_EX) == -1) {
+        perror(RESERVATIONS_PATH);
+        close(lock);
+        return EXIT_FAILURE;
+    }
+
+    *fd = lock;
+    
+    return EXIT_SUCCESS;
+}
+
+void release_lock(int fd) {
+    close(fd);
 }
