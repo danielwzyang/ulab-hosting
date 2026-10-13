@@ -39,12 +39,16 @@ void print_reservation(const Reservation *reservation, uint16_t port) {
     }
 }
 
-int get_reservations(Reservation *reservations, const char *path) {
+bool is_reservation_free(const Reservation *reservation) {
+    return reservation->owner[0] == '\0';
+}
+
+int get_reservations(Reservation *reservations) {
     DIR *dir;
-    dir = opendir(path);
+    dir = opendir(RESERVATIONS_PATH);
 
     if (dir == NULL) {
-        perror(path);
+        perror(RESERVATIONS_PATH);
         return EXIT_FAILURE;
     }
 
@@ -68,7 +72,7 @@ int get_reservations(Reservation *reservations, const char *path) {
         }
 
         size_t index = port - MIN_PORT;
-        if (reservations[index].owner[0] != '\0') {
+        if (!is_reservation_free(&reservations[index])) {
             fprintf(stderr, "%s: Port %u is already claimed by %s\n", filename, (unsigned int) port, reservations[index].owner);
             goto done;
         }

@@ -7,7 +7,7 @@ SRC := $(wildcard src/*.c) # find all c files in src
 OBJ := $(SRC:src/%.c=$(BUILD)/%.o) # substition to convert src list to obj list
 DEP := $(OBJ:.o=.d)
 
-.PHONY: run clean
+.PHONY: run setuid clean
 
 run: $(TARGET)
 	@./$(TARGET) $(ARGS)
@@ -22,6 +22,10 @@ $(BUILD)/%.o: src/%.c | $(BUILD) # build folder must exist but doesn't trigger r
 
 $(BUILD):
 	@mkdir -p $(BUILD)
+
+setuid:
+	@sudo chown root:root build/ulab-hosting                                                          130 :(
+	@sudo chmod u+s build/ulab-hosting 
 
 clean:
 	@rm -rf $(BUILD)

@@ -4,6 +4,7 @@
 
 #include "ulab-hosting/commands.h"
 #include "ulab-hosting/reservations.h"
+#include "ulab-hosting/sys.h"
 
 static int cmd_status(int argc, char * const *argv);
 static int cmd_reserve(int argc, char * const *argv);
@@ -53,8 +54,7 @@ static int cmd_status(int argc, char * const *argv) {
     }
 
     Reservation reservations[NUM_PORTS] = {0};
-    const char *path = "/etc/caddy/reservations";
-    if (get_reservations(reservations, path) != 0) {
+    if (get_reservations(reservations) != 0) {
         return EXIT_FAILURE;
     }
 
@@ -84,17 +84,38 @@ static int cmd_reserve(int argc, char * const *argv) {
     }
 
     Reservation reservations[NUM_PORTS] = {0};
-    const char *path = "/etc/caddy/reservations";
-    if (get_reservations(reservations, path) != 0) {
+    if (get_reservations(reservations) != 0) {
         return EXIT_FAILURE;
     }
     
-    if (port == 0 && find_free_port(reservations, &port) != 0) {
-        fprintf(stderr, "No free ports. See %s status [port]\n", argv[0]);
+    if (port == 0) {
+        if (find_free_port(reservations, &port) != 0) {
+            fputs("No free ports available.\n", stderr);
+            return EXIT_FAILURE;
+        }
+    } else if (!is_reservation_free(&reservations[port - MIN_PORT])) {
+        fprintf(stderr, "Port %u is already reserved.\n", (unsigned int) port);
         return EXIT_FAILURE;
     }
 
-    printf("Reserving port %u.\n", (unsigned int) port);
+    char username[MAX_USER_LEN + 1];
+    if (get_username(username) != 0) {
+        fputs("Failed to get username.\n", stderr);
+        return EXIT_FAILURE;
+    }
+
+    for (size_t i = 0; i < NUM_PORTS; i++) {
+        if (strcmp(reservations[i].owner, username) == 0) {
+            fprintf(stderr, "You already have port %u reserved.\n", (unsigned int) (i + MIN_PORT));
+            return EXIT_FAILURE;
+        }
+    }
+
+    if (write_reservation_file(username, port) != 0) {
+        return EXIT_FAILURE; 
+    }
+
+    printf("Successfully reserved port %u for %s.\n", (unsigned int) port, username);
 
     return EXIT_SUCCESS;
 } 

@@ -4,6 +4,7 @@
 #include <time.h>
 #include <stdbool.h>
 
+#define RESERVATIONS_PATH "/etc/caddy/reservations"
 #define MIN_PORT 10000
 #define MAX_PORT 10099
 #define NUM_PORTS (MAX_PORT - MIN_PORT + 1)
@@ -18,7 +19,9 @@ void print_reservation_header(void);
 void print_reservations(const Reservation *reservations, bool include_free);
 void print_reservation(const Reservation *reservation, uint16_t port);
 
-int get_reservations(Reservation *reservations, const char *path);
+bool is_reservation_free(const Reservation *reservation);
+
+int get_reservations(Reservation *reservations);
 
 int find_free_port(const Reservation *reservations, uint16_t *port);
 
