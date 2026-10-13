@@ -6,31 +6,37 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <time.h>
+#include <stdbool.h>
 
 #include "ulab-hosting/reservations.h"
 
-static int print_reservation(uint16_t port, const Reservation *reservation);
-
 static int parse_reservation(int dir_fd, const char *filename, uint16_t *port, Reservation *reservation);
 
-void print_reservations(const Reservation *reservations, size_t start, size_t end, int print_free) {
+void print_reservation_header(void) {
     printf("%-10s %-35s %-20s\n", "Port", "Owner", "Reservation Date");
     printf("%-10s %-35s %-20s\n", "---", "---", "---");
-    for (size_t i = start; i < end; i++) {
-        if (reservations[i].owner[0] != '\0' || print_free) {
+}
+
+void print_reservations(const Reservation *reservations, bool include_free) {
+    for (size_t i = 0; i < NUM_PORTS; i++) {
+        if (reservations[i].owner[0] != '\0' || include_free) {
             print_reservation(i + MIN_PORT, &reservations[i]);
         }
     }
 }
 
-static int print_reservation(uint16_t port, const Reservation *reservation) {
+void print_reservation(uint16_t port, const Reservation *reservation) {
     if (reservation->owner[0] == '\0') {
         printf("%-10u %-35s %-20s\n", port, "FREE", "FREE");
     } else {
-        printf("%-10u %-35s %-20s", port, reservation->owner, ctime(&reservation->reservation_time));
+        char time_str[32];
+        struct tm tm;
+        if (localtime_r(&reservation->reservation_time, &tm) == NULL || 
+                strftime(time_str, sizeof time_str, "%Y-%m-%d %H:%M", &tm) == 0) {
+            snprintf(time_str, sizeof time_str, "unknown");
+        }
+        printf("%-10u %-35s %-20s\n", port, reservation->owner, time_str);
     }
-
-    return EXIT_SUCCESS;
 }
 
 int get_reservations(Reservation *reservations, const char *path) {

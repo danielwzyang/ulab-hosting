@@ -59,12 +59,12 @@ static int cmd_status(int argc, char * const *argv) {
     }
 
     // if port == 0 print all ports otherwise only print specific port
-    // can potentially add a flag to print free ports when using status as well
+    print_reservation_header();
     if (port == 0) {
-        print_reservations(reservations, 0, NUM_PORTS, 0);
+        // can potentially add a flag to print free ports when using status as well
+        print_reservations(reservations, false);
     } else {
-        size_t index = port - MIN_PORT;
-        print_reservations(reservations, index, index + 1, 1); // still print if free
+        print_reservation(port, &reservations[port - MIN_PORT]);
     }
 
     return EXIT_SUCCESS;

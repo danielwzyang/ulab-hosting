@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include <time.h>
+#include <stdbool.h>
 
 #define MIN_PORT 10000
 #define MAX_PORT 10099
@@ -13,7 +14,9 @@ typedef struct {
     time_t reservation_time;
 } Reservation;
 
-void print_reservations(const Reservation *reservations, size_t start, size_t end, int print_free);
+void print_reservation_header(void);
+void print_reservations(const Reservation *reservations, bool include_free);
+void print_reservation(uint16_t port, const Reservation *reservation);
 
 int get_reservations(Reservation *reservations, const char *path);
 
