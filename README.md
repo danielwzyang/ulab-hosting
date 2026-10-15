@@ -71,7 +71,7 @@ C11 hides POSIX functions such as `openat`, `dirfd`, and `getline`, so the gcc f
 ## Build
 
 ```
-make build # compiles to build/ulab-hosting
+make # compiles to build/ulab-hosting
 make run ARGS="status" # build and run with arguments
 make clean # removes build directory
 ```
