@@ -5,9 +5,11 @@
 #include <stdbool.h>
 
 #define RESERVATIONS_PATH "/etc/caddy/reservations"
+
 #define MIN_PORT 10000
 #define MAX_PORT 10099
 #define NUM_PORTS (MAX_PORT - MIN_PORT + 1)
+
 #define MAX_USER_LEN 32 // doesn't include \0
 
 typedef struct {
@@ -26,3 +28,5 @@ int get_reservations(Reservation *reservations);
 int find_free_port(const Reservation *reservations, uint16_t *port);
 
 int parse_port(const char *arg, uint16_t *port);
+
+int get_reserved_port(const Reservation *reservations, const char *username, uint16_t *port);

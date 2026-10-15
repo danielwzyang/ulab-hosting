@@ -8,10 +8,12 @@
 
 static int cmd_status(int argc, char * const *argv);
 static int cmd_reserve(int argc, char * const *argv);
+static int cmd_release(int argc, char * const *argv);
 
 static const Command commands[] = {
     { "status", "[port]", "view all reserved ports or check status on a specific port", cmd_status },
     { "reserve", "[port]", "reserve a port forwarded to hosting.ee.cooper.edu/~<user>/", cmd_reserve },
+    { "release", "", "delete reservation", cmd_release },
 };
 
 static const size_t num_commands = sizeof commands / sizeof commands[0];
@@ -90,11 +92,23 @@ static int cmd_reserve(int argc, char * const *argv) {
 
     int rescode = EXIT_FAILURE;
 
+    char username[MAX_USER_LEN + 1];
+    if (get_username(username) != 0) {
+        fputs("Failed to get username.\n", stderr);
+        goto done;
+    }
+
     Reservation reservations[NUM_PORTS] = {0};
     if (get_reservations(reservations) != 0) {
         goto done;
     }
-    
+
+    uint16_t reserved;
+    if (get_reserved_port(reservations, username, &reserved) == 0) {
+        fprintf(stderr, "You already have port %u reserved.\n", (unsigned int) reserved);
+        goto done;
+    }
+
     if (port == 0) {
         if (find_free_port(reservations, &port) != 0) {
             fputs("No free ports available.\n", stderr);
@@ -105,19 +119,6 @@ static int cmd_reserve(int argc, char * const *argv) {
         goto done;
     }
 
-    char username[MAX_USER_LEN + 1];
-    if (get_username(username) != 0) {
-        fputs("Failed to get username.\n", stderr);
-        goto done;
-    }
-
-    for (size_t i = 0; i < NUM_PORTS; i++) {
-        if (strcmp(reservations[i].owner, username) == 0) {
-            fprintf(stderr, "You already have port %u reserved.\n", (unsigned int) (i + MIN_PORT));
-            goto done;
-        }
-    }
-
     if (write_reservation_file(username, port) != 0) {
         goto done;
     }
@@ -126,8 +127,40 @@ static int cmd_reserve(int argc, char * const *argv) {
 
     printf("Successfully reserved port %u for %s.\n", (unsigned int) port, username);
 
-    done:
+done:
     release_lock(lock);
     return rescode;
 } 
+
+static int cmd_release(int argc, char * const *argv) {
+    if (argc > 2) {
+        fprintf(stderr, "Too many arguments. Expected %s release\n", argv[0]);
+        return EXIT_FAILURE;
+    }
+
+    int lock;
+    if (get_file_lock(&lock) != 0) {
+        return EXIT_FAILURE;
+    }
+
+    int rescode = EXIT_FAILURE;
+
+    char username[MAX_USER_LEN + 1];
+    if (get_username(username) != 0) {
+        fputs("Failed to get username.\n", stderr);
+        goto done;
+    }
+
+    if (delete_reservation_file(username) != 0) {
+        goto done;
+    }
+
+    rescode = EXIT_SUCCESS;
+
+    printf("Successfully released port.\n");
+
+done:
+    release_lock(lock);
+    return rescode;
+}
 

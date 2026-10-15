@@ -82,7 +82,7 @@ int get_reservations(Reservation *reservations) {
 
     rescode = EXIT_SUCCESS;
 
-    done:
+done:
     closedir(dir);
     return rescode;
 }
@@ -144,7 +144,7 @@ static int parse_reservation(int dir_fd, const char *filename, uint16_t *port, R
 
     rescode = EXIT_SUCCESS;
 
-    done:
+done:
     // no longer own fd after fdopen so no close(fd)
     fclose(file);
     free(line);
@@ -175,5 +175,16 @@ int find_free_port(const Reservation *reservations, uint16_t *port) {
         }
     }
     
+    return EXIT_FAILURE;
+}
+
+int get_reserved_port(const Reservation *reservations, const char *username, uint16_t *port) {
+    for (size_t i = 0; i < NUM_PORTS; i++) {
+        if (strcmp(reservations[i].owner, username) == 0) {
+            *port = (uint16_t) (i + MIN_PORT);        
+            return EXIT_SUCCESS;
+        }
+    }
+
     return EXIT_FAILURE;
 }
