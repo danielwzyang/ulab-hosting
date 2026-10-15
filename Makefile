@@ -8,7 +8,9 @@ SRC := $(wildcard src/*.c) # find all c files in src
 OBJ := $(SRC:src/%.c=$(BUILD)/%.o) # substition to convert src list to obj list
 DEP := $(OBJ:.o=.d)
 
-.PHONY: run setuid clean
+.PHONY: all run setuid install uninstall clean
+
+all: $(TARGET)
 
 run: $(TARGET)
 	@./$(TARGET) $(ARGS)
@@ -26,13 +28,15 @@ $(BUILD):
 
 setuid: $(TARGET)
 	@sudo chown root:root $(TARGET)
-	@sudo chmod u+s $(TARGET)
+	@sudo chmod 4755 $(TARGET)
 
 install: $(TARGET)
 	@sudo install -o root -g root -m 4755 $(TARGET) $(BIN)
+	@echo "installed $(BIN)"
 
 uninstall: $(TARGET)
 	@sudo rm -f $(BIN)
+	@echo "uninstalled $(BIN)"
 
 clean:
 	@rm -rf $(BUILD)
