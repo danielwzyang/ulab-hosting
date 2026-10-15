@@ -5,7 +5,6 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <sys/file.h>
-#include <errno.h>
 
 #include "ulab-hosting/reservations.h"
 
@@ -97,12 +96,7 @@ int delete_reservation_file(const char *username) {
     snprintf(path, sizeof path, "%s/%s.conf", RESERVATIONS_PATH, username);
 
     if (unlink(path) != 0) {
-        if (errno == ENOENT) {
-            fputs("You don't have a port reserved.\n", stderr);
-        } else {
-            perror(path);
-        }
-
+        perror(path);
         return EXIT_FAILURE;
     }
 

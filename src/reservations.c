@@ -27,7 +27,7 @@ void print_reservations(const Reservation *reservations, bool include_free) {
 
 void print_reservation(const Reservation *reservation, uint16_t port) {
     if (reservation->owner[0] == '\0') {
-        printf("%-10u %-35s %-20s\n", port, "FREE", "FREE");
+        printf("%-10u %-35s %-20s\n", (unsigned int) port, "N/A", "N/A");
     } else {
         char time_str[32];
         struct tm tm;
@@ -66,7 +66,7 @@ int get_reservations(Reservation *reservations) {
         if (length <= 5 || length > MAX_USER_LEN + 5 || strcmp(filename + length - 5, ".conf") != 0) continue;
         
         uint16_t port = 0;
-        Reservation reservation;
+        Reservation reservation = {0};
         if (parse_reservation(dirfd(dir), filename, &port, &reservation) != 0) {
             goto done;
         }

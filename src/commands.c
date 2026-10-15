@@ -125,7 +125,7 @@ static int cmd_reserve(int argc, char * const *argv) {
 
     rescode = EXIT_SUCCESS;
 
-    printf("Successfully reserved port %u for %s.\n", (unsigned int) port, username);
+    printf("Successfully reserved port %u.\n", (unsigned int) port);
 
 done:
     release_lock(lock);
@@ -151,13 +151,24 @@ static int cmd_release(int argc, char * const *argv) {
         goto done;
     }
 
+    Reservation reservations[NUM_PORTS] = {0};
+    if (get_reservations(reservations) != 0) {
+        goto done;
+    }
+
+    uint16_t port;
+    if (get_reserved_port(reservations, username, &port) != 0) {
+        fputs("You don't have a port reserved.\n", stderr);
+        goto done;
+    }
+
     if (delete_reservation_file(username) != 0) {
         goto done;
     }
 
     rescode = EXIT_SUCCESS;
 
-    printf("Successfully released port.\n");
+    printf("Successfully released port %u.\n", (unsigned int) port);
 
 done:
     release_lock(lock);
