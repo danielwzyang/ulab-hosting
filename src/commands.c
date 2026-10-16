@@ -125,7 +125,10 @@ static int cmd_reserve(int argc, char * const *argv) {
 
     rescode = EXIT_SUCCESS;
 
-    printf("Successfully reserved port %u.\n", (unsigned int) port);
+    printf("Successfully reserved port %u.\n\n", (unsigned int) port);
+    
+    puts("Run the command below in the directory of your web server so it can be read without a Kerberos token.");
+    puts("$ fs setacl . system:anyuser read");
 
 done:
     release_lock(lock);
