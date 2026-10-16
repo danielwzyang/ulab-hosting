@@ -8,9 +8,7 @@ SRC := $(wildcard src/*.c) # find all c files in src
 OBJ := $(SRC:src/%.c=$(BUILD)/%.o) # substition to convert src list to obj list
 DEP := $(OBJ:.o=.d)
 
-.PHONY: all run setuid install uninstall clean
-
-all: $(TARGET)
+.PHONY: run setuid install uninstall clean
 
 run: $(TARGET)
 	@./$(TARGET) $(ARGS)
