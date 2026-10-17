@@ -42,14 +42,21 @@ The Caddyfile must live in `/etc/caddy`, and use the snippet `user` as defined i
 
 ```
 (user) {
-        # args = [username, port]
-        handle_path /~{args[0]}/* {
-                reverse_proxy 127.0.0.1:{args[1]}
-        }
+	# args = [username, port]
+	
+	# redirect even if no trailing slash
+	redir /~{args[0]} /~{args[0]}/ 308
+
+	handle_path /~{args[0]}/* {
+		reverse_proxy 127.0.0.1:{args[1]}
+	}
 }
 
 :8080 {
-        import reservations/*.conf # relative to Caddyfile
+	root * /var/www/html
+	file_server
+
+	import reservations/*.conf
 }
 ```
 
